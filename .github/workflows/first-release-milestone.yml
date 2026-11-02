@@ -35,7 +35,7 @@ jobs:
                 description: '표지부터 시작하는 2:1 일일노트. 다행체·글꼴/크기 설정, 기록 편집, 날짜 이동, 로컬 저장·백업·복원, 항목 이동과 삭제 복구를 갖춘 개인용 첫 버전. 마감일은 정하지 않음.'
               })).data;
             }
-            const issueNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16];
+            const issueNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 16];
             for (const issue_number of issueNumbers) {
               const { data: issue } = await github.rest.issues.get({ owner, repo, issue_number });
               if (issue.milestone && issue.milestone.number !== milestone.number) {
