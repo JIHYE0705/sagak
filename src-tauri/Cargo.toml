@@ -1,0 +1,23 @@
+[package]
+name = "sagak"
+version = "0.1.0"
+description = "펼쳐 쓰는 나의 하루."
+edition = "2021"
+rust-version = "1.99"
+
+[lib]
+name = "sagak_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-single-instance = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rusqlite = { version = "0.38", features = ["bundled"] }
+
+[dev-dependencies]
+tempfile = "3"
