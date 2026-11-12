@@ -34,8 +34,11 @@ PC에 설치해 독립된 창에서 표지를 열고, 가로로 펼친 두 페�
 
 ## 현재 상태
 
-기획·디자인 방향을 정리하는 단계입니다. 실행 가능한 앱과 저장 기능은 아직 없습니다.
-macOS 전용 앱, Tauri + React + TypeScript + Vite, SQLite, Intel·Apple Silicon 지원을 확정했습니다. 최소 macOS 버전과 서명·공증 등 배포 세부사항은 구현 단계에서 확인합니다. GPT 연동은 선택적 후속 검토이며 MVP 범위가 아닙니다.
+첫 로컬 기록 흐름을 구현했습니다. 버터색 표지에서 현지 날짜의 오늘 노트를 열고, 좌우 역할 제목·할 일·보조 칸·완료 상태·메모를 SQLite에 자동 저장합니다. 저장 중·완료·실패와 재시도를 표시하며 정상 종료 요청 시 남은 저장을 기다립니다. 자정이 지나면 현재 기록의 날짜를 표시하고 저장 후 오늘 페이지를 열 수 있습니다.
+
+다행체 원본과 [저작권 안내·라이선스](public/fonts/LICENSE.txt)는 앱에 포함합니다. 기본 본문은 실제 18px이며 글꼴·크기 선택은 후속 작업입니다. 기본 창은 1240×800, 최소 창은 960×640입니다. 내용이 길면 할 일·메모 안에서 스크롤하고, 노트 전체 2:1 비율을 유지합니다.
+
+날짜 탐색, 노트 이름·시작 화면·글꼴 설정, 항목 삭제·이동, JSON 백업·복원은 아직 구현하지 않았습니다. Intel·Apple Silicon 지원이 목표이며 현재 Apple Silicon 개발용 `.app` 빌드까지만 확인했습니다. 실제 앱 창 입력·종료·재실행, Intel, OS 재시작, 설치·업데이트, 서명·공증 검수는 남아 있습니다. [검증 기록](docs/verification/2026-11-12-first-note.md)에 범위를 구분했습니다.
 
 ## 문서
 
@@ -46,9 +49,35 @@ macOS 전용 앱, Tauri + React + TypeScript + Vite, SQLite, Intel·Apple Silico
 
 ## 개발 시작
 
-기획서와 디자인 가이드를 읽고 확정한 스택으로 프로젝트를 초기화합니다.
-첫 구현 목표는 표지 → 오늘 노트 작성 → SQLite 자동 저장 → 재실행 후 기록 복원입니다.
-실제 프로젝트 초기화 후 이 문서에 설치·실행·검증 명령을 추가합니다.
+macOS, Node.js 24 이상, Rust stable 1.99 이상, Xcode 명령줄 도구가 필요합니다. Rust 설치 후 새 터미널을 열거나 `source "$HOME/.cargo/env"`로 Cargo 경로를 적용합니다. [Tauri 공식 준비 안내](https://v2.tauri.app/start/prerequisites/)를 참고하세요.
+
+```sh
+npm ci
+npm run tauri dev
+```
+
+데스크톱 앱을 실행하며 기록은 개발 서버나 브라우저 저장소에 보관하지 않습니다. 화면만 미리 볼 때는 `npm run dev` 후 `http://127.0.0.1:1420`을 엽니다. 브라우저 미리보기 입력은 저장되지 않습니다.
+
+```sh
+npm test
+npm run typecheck
+npm run build
+cargo test --locked --manifest-path src-tauri/Cargo.toml
+cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+cargo clippy --locked --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+npm run tauri build -- --debug --bundles app
+```
+
+형식·정적 검사 도구는 `rustup component add rustfmt clippy`로 설치합니다. 마지막 명령은 현재 Mac 아키텍처용 개발 빌드 `src-tauri/target/debug/bundle/macos/사각.app`을 만듭니다. 배포용 서명·공증·DMG를 검증한 결과물은 아닙니다. 기존 디자인 시안 워크플로와 별도로 macOS 앱 검사 CI를 추가했습니다.
+
+## 로컬 기록
+
+- 앱 식별자: `com.jihye.sagak`. DB: `~/Library/Application Support/com.jihye.sagak/sagak.sqlite3` (`app_data_dir` 기준).
+- 스키마 v1: 날짜를 키로 좌우 페이지 전체를 JSON 스냅샷으로 저장하는 `pages` 테이블. 할 일 ID·순서·완료 여부·메모·그날의 제목을 함께 보존합니다.
+- Rust만 DB에 접근합니다. 쓰기 순서를 직렬화하고 SQLite 트랜잭션이 완료된 뒤 저장 완료를 표시합니다. 중복 실행은 기존 창으로 이동합니다.
+- 읽기에 실패하면 빈 기록으로 덮어쓰지 않습니다. 더 새로운 DB 버전도 초기화하지 않고 오류를 표시합니다. 하루 기록의 상한은 8MB입니다.
+- 개발·앱 번들 모두 같은 기록 경로를 사용합니다. 빌드 폴더를 지워도 DB는 남습니다. 앱 데이터 폴더를 삭제하면 기록도 삭제됩니다.
+- 아직 외부 백업·복원 기능이 없습니다. 강제 종료·전원 손실 시 저장 완료 전의 입력은 유실될 수 있으므로 현재 빌드는 가상 기록 검수용으로 사용합니다.
 
 ## 참고
 

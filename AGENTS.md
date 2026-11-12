@@ -7,7 +7,7 @@
 3. `docs/implementation-plan.md`
 
 사용자의 명시적인 최신 지시를 우선하고, 변경 사항은 관련 문서에도 반영한다.
-확정 사항과 제안을 혼동하지 않는다. 이 저장소는 문서 단계다. 2026-11-07에 Tauri + React + TypeScript + Vite, 로컬 SQLite를 확정했다.
+확정 사항과 제안을 혼동하지 않는다. 2026-11-12에 첫 앱 골격·오늘 기록 입력·SQLite 저장을 구현했다. 실제 앱 창 검수와 후속 기능은 `docs/implementation-plan.md`·검증 기록을 확인한다. 2026-11-07에 Tauri + React + TypeScript + Vite, 로컬 SQLite를 확정했다.
 
 ## 반드시 유지할 제품 기준
 
